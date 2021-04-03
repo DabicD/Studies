@@ -1,0 +1,79 @@
+FUNCTION_BLOCK crashchance
+
+VAR_INPUT
+    temperature : REAL;
+    target : REAL;
+END_VAR
+
+VAR_OUTPUT
+	conditioner : REAL;
+END_VAR
+
+FUZZIFY temperature
+	TERM toocold := (-20, 1) (0, 1) (5, 0);
+	TERM cold := (0, 0) (5,1) (10,1) (15,0);
+	TERM warm := (10, 0) (15, 1) (20, 1) (25, 0);
+	TERM hot := (20, 0) (25, 1) (30, 1) (35, 0);
+	TERM toohot := (30, 0) (35, 1) (60, 1);
+
+END_FUZZIFY
+
+FUZZIFY target
+	TERM toocold := (-20, 1) (0, 1) (5, 0);
+	TERM cold := (0, 0) (5,1) (10,1) (15,0);
+	TERM warm := (10, 0) (15, 1) (20, 1) (25, 0);
+	TERM hot := (20, 0) (25, 1) (30, 1) (35, 0);
+	TERM toohot := (30, 0) (35, 1) (60, 1);
+
+END_FUZZIFY
+
+DEFUZZIFY conditioner
+	TERM cooler := (0, 1) (5, 1) (10,0) ;
+	TERM cool := (5, 0) (10, 1) (15,0) ;
+	TERM nochange := (10, 0) (15,1) (20,0);
+	TERM heat := (15, 0) (20, 1) (25, 0);
+	TERM heater := (20, 0) (25, 1) (30, 1);
+
+	METHOD : COG;
+	DEFAULT := 0;
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;			// Use 'min' for 'and' (also implicit use 'max' for 'or' to fulfill DeMorgan's Law)
+	ACT : MIN;			// Use 'min' activation method
+	ACCU : MAX;			// Use 'max' accumulation method
+
+	RULE 1 : IF temperature IS toocold AND target IS toocold THEN conditioner IS nochange;
+	RULE 2 : IF temperature IS toocold AND target IS cold THEN conditioner IS heat;
+	RULE 3 : IF temperature IS toocold AND target IS warm Then conditioner IS heater;
+	RULE 4 : IF temperature IS toocold AND target IS hot Then conditioner IS heater;
+	RULE 5 : IF temperature IS toocold AND target IS toohot Then conditioner IS heater;
+
+	RULE 6 : IF temperature IS cold AND target IS toocold THEN conditioner IS cool;
+	RULE 7 : IF temperature IS cold AND target IS cold THEN conditioner IS nochange;
+	RULE 8 : IF temperature IS cold AND target IS warm THEN conditioner IS heat;
+	RULE 9 : IF temperature IS cold AND target IS hot THEN conditioner IS heater;
+	RULE 10 : IF temperature IS cold AND target IS toohot THEN conditioner IS heater;
+
+	RULE 11 : IF temperature IS warm AND target IS toocold THEN conditioner IS cooler;
+	RULE 12 : IF temperature IS warm AND target IS cold THEN conditioner IS cool;
+	RULE 13 : IF temperature IS warm AND target IS warm THEN conditioner IS nochange;
+	RULE 14 : IF temperature IS warm AND target IS hot THEN conditioner IS heat;
+	RULE 15 : IF temperature IS warm AND target IS toocold THEN conditioner IS heater;
+
+	RULE 16 : IF temperature IS hot AND target IS toocold THEN conditioner IS cooler;
+	RULE 17 : IF temperature IS hot AND target IS cold THEN conditioner IS cooler;
+	RULE 18 : IF temperature IS hot AND target IS warm THEN conditioner IS cool;
+	RULE 19 : IF temperature IS hot AND target IS hot THEN conditioner IS nochange;
+	RULE 20 : IF temperature IS hot AND target IS toohot THEN conditioner IS heat;
+
+	RULE 21 : IF temperature IS toohot AND target IS toocold THEN conditioner IS cooler;
+	RULE 22 : IF temperature IS toohot AND target IS cold THEN conditioner IS cooler;
+	RULE 23 : IF temperature IS toohot AND target IS warm THEN conditioner IS cooler;
+	RULE 24 : IF temperature IS toohot AND target IS hot THEN conditioner IS cool;
+	RULE 25 : IF temperature IS toohot AND target IS toohot THEN conditioner IS nochange;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
+

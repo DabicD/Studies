@@ -1,0 +1,53 @@
+FUNCTION_BLOCK crashchance
+
+VAR_INPUT
+    typeOfDirtness : REAL;
+	dirtness : REAL;
+END_VAR
+
+VAR_OUTPUT
+	washTime : REAL;
+END_VAR
+
+FUZZIFY typeOfDirtness
+	TERM notgreasy := (0, 1) (50, 0);
+	TERM medium := (0, 0) (50,1) (100,0);
+	TERM greasy := (50, 0) (100, 1); 
+END_FUZZIFY
+
+FUZZIFY dirtness
+	TERM small := (0, 1) (50, 0); 
+	TERM medium := (0, 0) (50,1) (100,0);
+	TERM large := (50, 0) (100, 1);
+END_FUZZIFY
+
+DEFUZZIFY washTime
+	TERM veryShort := (0, 0) (7, 1) (12,0) ;
+	TERM short := (7, 0) (12,1) (20,0);
+	TERM medium := (12, 0) (20, 1) (42, 0);
+	TERM long := (20, 0) (42,1) (60,0) ;
+	TERM veryLong := (42, 0) (60, 1) ;
+	METHOD : COG;
+	DEFAULT := 0;
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;
+	ACT : MIN;
+	ACCU : MAX;
+
+	RULE 1 : IF dirtness IS large AND typeOfDirtness is greasy THEN washTime IS veryLong;
+	RULE 2 : IF dirtness IS medium AND typeOfDirtness IS greasy THEN washTime IS long; 
+	RULE 3 : IF dirtness IS small AND typeOfDirtness is greasy THEN washTime IS long;
+
+	RULE 4 : IF dirtness IS large AND typeOfDirtness is medium THEN washTime IS long;
+	RULE 5 : IF dirtness IS medium AND typeOfDirtness is medium THEN washTime IS medium;
+	RULE 6 : IF dirtness IS small AND typeOfDirtness is medium THEN washTime IS medium;
+	
+	RULE 7 : IF dirtness IS large AND typeOfDirtness is notgreasy THEN washTime IS medium;
+	RULE 8 : IF dirtness IS medium AND typeOfDirtness is notgreasy THEN washTime IS short;
+	RULE 9 : IF dirtness IS small AND typeOfDirtness is notgreasy THEN washTime IS veryShort;
+	
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK

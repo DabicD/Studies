@@ -1,0 +1,46 @@
+FUNCTION_BLOCK crashchance
+
+VAR_INPUT
+    distance : REAL;
+END_VAR
+
+VAR_OUTPUT
+	sugested : REAL;
+END_VAR
+
+FUZZIFY distance
+	TERM verynearby := (0, 1) (5, 1) (15, 0);
+	TERM nearby := (10, 0) (50,1) (70,1) (100,0);
+	TERM decent := (80, 0) (100, 1) (200, 1) (250, 0);
+	TERM far := (200, 0) (250, 1) (400, 1) (500, 0);
+	TERM faraway := (450, 0) (650,1) (1000, 1);
+
+END_FUZZIFY
+
+DEFUZZIFY sugested
+	TERM veryslow := (0, 1) (10, 0);
+	TERM slow := (8, 0) (10,1) (15,1) (25,0);
+	TERM decent := (20, 0) (35, 1) (50, 1) (60, 0);
+	TERM fast := (55, 0) (65, 1) (75, 1) (80, 0);
+	TERM veryfast := (75, 0) (120, 1);
+
+	METHOD : COG;
+	DEFAULT := 0;
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;			// Use 'min' for 'and' (also implicit use 'max' for 'or' to fulfill DeMorgan's Law)
+	ACT : PROD;			// Use 'min' activation method
+	ACCU : MAX;			// Use 'max' accumulation method
+
+	RULE 1 : IF distance IS verynearby THEN sugested IS veryslow;
+	RULE 2 : IF distance IS nearby THEN sugested IS slow;
+	RULE 3 : IF distance IS decent THEN sugested IS decent;
+	RULE 4 : IF distance IS far THEN sugested IS fast;
+	RULE 5 : IF distance IS faraway THEN sugested IS veryfast;
+
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
+
