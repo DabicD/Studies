@@ -27,7 +27,8 @@ try:
 
     #   Showing the result
     for i in range(0, len(arr)):
-        print(arr[i][0] + ": " + arr[i][1])
+        if(arr[i][1] != '1'):
+            print(arr[i][0] + ": " + arr[i][1])
 
 except:
     print("Wrong input")
