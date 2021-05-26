@@ -9,7 +9,7 @@
 import re
 x1 = input("Random text input with included number: ")
 
-phone = re.findall(r'[+[\n]?\d{1,3}[\n-]?]?\d{3}[\s-]?\d{3}[\s-]?\d{3}', x1)
+phone = re.findall(r'[+[\s]?\d{1,3}[\s-]?]?\d{3}[\s-]?\d{3}[\s-]?\d{3}', x1)
 
 try:
     print("Phone number: " + str(phone[0]))
